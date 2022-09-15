@@ -1,6 +1,6 @@
 namespace CommandLineSample;
 
-public interface ICommandHandler<in TArgs> where TArgs : class
+public interface ICommandHandler<in TArgs>
 {
     Task Handle(TArgs args);
 }

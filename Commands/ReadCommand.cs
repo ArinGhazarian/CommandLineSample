@@ -1,23 +1,20 @@
 using System.CommandLine;
+using CommandLineSample.Handlers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CommandLineSample.Commands;
 
-public class ReadCommand : Command
+public class ReadCommand : BaseCommand<ReadCommandArgs, ReadCommandHandler>
 {
     public ReadCommand() : base("read", "Read and display the file.")
     {
-        AddOption(Options.File);
-        AddOption(Options.Delay);
-        AddOption(Options.ForegroundColor);
-        AddOption(Options.LightMode);
+        AddOption(File);
+        AddOption(Delay);
+        AddOption(ForegroundColor);
+        AddOption(LightMode);
     }
-    
-    public new ReadCommandOptions Options { get; } = new();
-}
 
-public class ReadCommandOptions
-{
-    public Option<FileInfo?> File { get; } = new(
+    public Option<FileInfo> File { get; } = new(
         name: "--file",
         description: "The file to read and display on the console.");
 
@@ -35,17 +32,23 @@ public class ReadCommandOptions
         name: "--light-mode",
         description: "Background color of text displayed on the console: default is black, light mode is white.");
 
-    public Option<string?> ApiUrl { get; } = new("--api-url") { IsRequired = false };
+    public Option<string> ApiUrl { get; } = new("--api-url") { IsRequired = false };
 
-    public Option<string?> GithubPat { get; } = new("--github-pat") { IsRequired = false };
+    public Option<string> GithubPat { get; } = new("--github-pat") { IsRequired = false };
+
+    public ReadCommandHandler BuildHandler(ReadCommandArgs args, ServiceProvider sp)
+    {
+        // this is the replacement for factories/custom-binders
+        return new ReadCommandHandler(sp.GetService<Logger>(), new GithubClient(sp.GetService<Logger>(), sp.GetService<HttpClient>(), args.ApiUrl, args.GithubPat));
+    }
 }
 
-public class ReadCommandArgs
+public class ReadCommandArgs : ICommandArgs
 {
-    public FileInfo? File { get; set; }
+    public FileInfo File { get; set; }
     public int Delay { get; set; }
     public ConsoleColor ForegroundColor { get; set; }
     public bool LightMode { get; set; }
-    public string? ApiUrl { get; set; }
-    public string? GithubPat { get; set; }
+    public string ApiUrl { get; set; }
+    public string GithubPat { get; set; }
 }

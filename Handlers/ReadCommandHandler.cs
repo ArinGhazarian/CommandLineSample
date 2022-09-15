@@ -12,13 +12,13 @@ public class ReadCommandHandler : ICommandHandler<ReadCommandArgs>
         _logger = logger;
         _githubClient = githubClient;
     }
-    
+
     public async Task Handle(ReadCommandArgs args)
     {
         _logger.LogInfo(args.LightMode.ToString());
         _logger.LogInfo(args.ForegroundColor.ToString());
         _logger.LogInfo(args.File?.FullName ?? "");
-
+        
         await _githubClient.GetAll("id");
     }
 }
